@@ -1,6 +1,7 @@
 import cv2
 import sys
 import numpy
+import ctypes
 from PyQt5 import QtCore, QtGui, QtWidgets
 from CV_hw1_ui import Ui_MainWindow
 from scipy import signal
@@ -46,7 +47,7 @@ class MainWindow(QtWidgets.QMainWindow):
         '''
         #img = cv2.imread(frame[0]) # frame[0] is the path of image
 
-        img = cv2.imread(self.path+"/Dataset_opencvdl/Q1_Image/Uncle_Roger.jpg")
+        img = cv2.imread("Dataset_opencvdl/Q1_Image/Uncle_Roger.jpg")
         cv2.imshow("Image", img)
         print("Image Height : ",img.shape[0])
         print("Image Width : ",img.shape[1])
@@ -55,7 +56,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     # 1.2 Color Seperation
     def colorSeperation(self):
-        img = cv2.imread(self.path+"/Dataset_opencvdl/Q1_Image/Flower.jpg")
+        img = cv2.imread("Dataset_opencvdl/Q1_Image/Flower.jpg")
         cv2.imshow("Flower", img)
         
         # b, g, r is single channel (灰階圖), notice that sequence is b, g, r
@@ -75,7 +76,7 @@ class MainWindow(QtWidgets.QMainWindow):
     
     # 1.3 Image Flipping
     def imageFlipping(self):
-        img = cv2.imread(self.path+"/Dataset_opencvdl/Q1_Image/Uncle_Roger.jpg")
+        img = cv2.imread("Dataset_opencvdl/Q1_Image/Uncle_Roger.jpg")
         ''' 
         second parameter of cv2.flip() is flipping mode
         0 for vertical flipping, 1 for horizontal flipping,
@@ -95,7 +96,7 @@ class MainWindow(QtWidgets.QMainWindow):
         cv2.imshow("img", img)
 
     def imgBlending(self):
-        self.img1 = cv2.imread(self.path+"/Dataset_opencvdl/Q1_Image/Uncle_Roger.jpg")
+        self.img1 = cv2.imread("Dataset_opencvdl/Q1_Image/Uncle_Roger.jpg")
         self.img2 = cv2.flip(self.img1, 1)
         cv2.imshow("img", self.img1)
         cv2.createTrackbar('tracker','img', 0, 255, self.blending)
@@ -106,7 +107,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     # 2.1 Median Filter
     def medianFilter(self):
-        imgCat = cv2.imread(self.path+"/Dataset_opencvdl/Q2_Image/Cat.png")
+        imgCat = cv2.imread("Dataset_opencvdl/Q2_Image/Cat.png")
         # cv2.imshow("Cat",imgCat)
         '''
             medianBlur() : first parameter is source, 
@@ -120,7 +121,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     # 2.2 Gaussian Blur
     def gaussianBlur(self):
-        imgCat2 = cv2.imread(self.path+"/Dataset_opencvdl/Q2_Image/Cat.png")
+        imgCat2 = cv2.imread("Dataset_opencvdl/Q2_Image/Cat.png")
         '''
             GaussianBlur():the first parameter is source
             second parameter is width and height of kernel, which should be positive and odd
@@ -135,7 +136,7 @@ class MainWindow(QtWidgets.QMainWindow):
     
     # 2.3 Bilateral Filter
     def bilateralFilter(self):
-        imgCat3 = cv2.imread(self.path+"/Dataset_opencvdl/Q2_Image/Cat.png")
+        imgCat3 = cv2.imread("Dataset_opencvdl/Q2_Image/Cat.png")
         '''
             bilateralfilter():four arguments, second is Diameter of each pixel neighborhood
             third parameter is sigmaColor, The greater the value, the colors farther to each other will start to get mixed.
@@ -152,7 +153,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     # the following three funcs will setting the global variable chihiroGaussian, sobelx and sobely 
     def Gaussian_func(self):
-        self.chihiroGrayscale = cv2.imread(self.path+"/Dataset_opencvdl/Q3_Image/Chihiro.jpg", 0)
+        self.chihiroGrayscale = cv2.imread("Dataset_opencvdl/Q3_Image/Chihiro.jpg", 0)
         # Generate Gaussian filter
         x,y = numpy.mgrid[-1:2, -1:2 ]
         gaussian_kernel = numpy.exp(-(x**2 + y**2))
@@ -216,14 +217,20 @@ class MainWindow(QtWidgets.QMainWindow):
 
     # 4. Transformation
     def transformation(self):
-        parrot = cv2.imread(self.path + "/Dataset_opencvdl/Q4_Image/Parrot.png")
-        #cv2.imshow("Parrot_origin", parrot)
+        parrot = cv2.imread("Dataset_opencvdl/Q4_Image/Parrot.png")
 
         rotation = self.ui.edit_retation.text()
         scaling = self.ui.edit_scaling.text()
         tx = self.ui.edit_tx.text()
         ty = self.ui.edit_ty.text()
-        
+
+        if rotation == "" or scaling == "" or tx == "" or ty == "":
+            ctypes.windll.user32.MessageBoxW(0, "Fill out the form, OK ?", "可憐吶", 1)
+            return
+        if not rotation.isdigit() or not scaling.isdigit() or not tx.isdigit() or not ty.isdigit():
+            ctypes.windll.user32.MessageBoxW(0, "Input should only be digits and positive integer, OK ?", "可憐吶", 1)
+            return
+
         rows = parrot.shape[0]
         cols = parrot.shape[1]
         M = numpy.float32([
